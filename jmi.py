@@ -2,164 +2,146 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# --- ១. ការកំណត់ទម្រង់ទំព័រ (Configuration) ---
+# --- ១. ការកំណត់ទម្រង់ទំព័រ (Executive Configuration) ---
 st.set_page_config(
     page_title="JMI | Executive Management Portal",
     page_icon="🏥",
     layout="wide"
 )
 
-# --- ២. រចនាប័ទ្មពណ៌ និង CSS (Custom Styling) ---
+# --- ២. រចនាប័ទ្ម CSS សម្រាប់ System និង Premium Certificate ---
 st.markdown("""
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <style>
-    .main { background-color: #f8f9fa; }
-    .stButton>button { width: 100%; border-radius: 10px; height: 3em; background-color: #001f3f; color: white; font-weight: bold; }
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #D4AF37; }
-    .cert-container { border:10px solid #001f3f; padding:50px; text-align:center; background-color:white; border-radius:15px; position:relative; color: #001f3f; }
-    .cert-inner { border:5px solid #D4AF37; padding:30px; }
+    /* System Styling */
+    .main { background-color: #f4f7f6; }
+    .stButton>button { width: 100%; border-radius: 8px; height: 3em; background-color: #001f3f; color: white; font-weight: bold; border: none; transition: 0.3s; }
+    .stButton>button:hover { background-color: #D4AF37; color: #001f3f; }
+    .stMetric { background-color: #ffffff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #D4AF37; }
+    
+    /* Certificate Styling */
+    .cert-outer-wrapper { background-color: #e0e0e0; padding: 40px; border-radius: 15px; }
+    .cert-paper { background-color: white; border: 15px solid #001f3f; padding: 20px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); max-width: 900px; margin: auto; }
+    .cert-gold-border { border: 5px double #D4AF37; padding: 50px; text-align: center; }
+    .cert-title { font-family: 'Cinzel', serif; color: #001f3f; font-size: 50px; margin: 10px 0; }
+    .student-name { font-family: 'Great Vibes', cursive; font-size: 65px; color: #D4AF37; margin: 15px 0; font-weight: normal; }
+    .cert-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: #333; line-height: 1.6; }
+    .official-seal { width: 110px; height: 110px; border: 3px double #D4AF37; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D4AF37; font-family: 'Cinzel', serif; font-weight: bold; font-size: 13px; transform: rotate(-15deg); margin: auto; }
+    .signature-font { font-family: 'Great Vibes', cursive; font-size: 30px; color: #001f3f; margin-bottom: -10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- ៣. ផ្នែកចាត់ចែងទិន្នន័យ (Database Simulation) ---
-# កំណត់ឱ្យរក្សាទុកទិន្នន័យបណ្ដោះអាសន្ន (Session State)
+# --- ៣. ផ្នែកចាត់ចែងទិន្នន័យ (Session State Database) ---
 if 'students_db' not in st.session_state:
-    # បង្កើតទិន្នន័យគំរូខ្លះៗ ដើម្បីឱ្យលោកបណ្ឌិតងាយស្រួលតេស្តមើល Certificate
+    # បង្កើតទិន្នន័យគំរូសម្រាប់តេស្ត
     st.session_state.students_db = pd.DataFrame([
-        {'ID': 'JMI-2026-001', 'Name': 'Sokhoeurn Sovannachak', 'Grade': 'G1-G3', 'Enroll_Date': '2026-03-01', 'Status': 'Active'}
+        {'ID': 'JMI-2026-001', 'Name': 'Sokhoeurn Sovannachak', 'Grade': 'G1-G3', 'Enroll_Date': '2026-03-25', 'Status': 'Active'}
     ])
 
-# --- ៤. របារចំហៀង និងការផ្ទៀងផ្ទាត់ (Sidebar & Auth) ---
-st.sidebar.image("logo.png", use_container_width=True)
-st.sidebar.title("JMI STRATEGIC ACCESS")
-access_code = st.sidebar.text_input("Academic Director Code", type="password", placeholder="••••••••")
+# --- ៤. របារចំហៀង និងការផ្ទៀងផ្ទាត់ (Sidebar & Security) ---
+st.sidebar.image("logo.png", use_container_width=True) # លោកបណ្ឌិតត្រូវមាន file logo.png ក្នុង github ដែរ
+st.sidebar.title("JMI EXECUTIVE ACCESS")
+access_code = st.sidebar.text_input("Director's Key", type="password", placeholder="••••••••")
 
 if access_code == "JMI2026":
-    st.sidebar.success("Welcome, Dr. CHAN Sokhoeurn")
-    
-    # ម៉ឺនុយបញ្ជា (Navigation)
-    menu = st.sidebar.radio("MAIN MENU", 
-                            ["📊 Dashboard", "🎓 Student Enrollment", "🏅 Skill Passport", "📜 Certification"])
+    st.sidebar.success(f"Director: Dr. CHAN Sokhoeurn")
+    menu = st.sidebar.radio("STRATEGIC MODULES", 
+                            ["📊 Dashboard", "🎓 Enrollment", "🏅 Skill Passport", "📜 Premium Certification"])
     
     st.sidebar.markdown("---")
-    if st.sidebar.button("LOGOUT SYSTEM"):
+    if st.sidebar.button("EXIT SYSTEM"):
         st.rerun()
 
     # --- ៥. ទំព័រ Dashboard ---
     if menu == "📊 Dashboard":
-        st.title("🏥 JMI Management Dashboard")
-        st.write(f"Logged in as: **Dr. CHAN Sokhoeurn, DBA**")
+        st.title("🏥 JMI Strategic Management")
+        st.write("Welcome to the command center of **Junior Medical Institute**.")
         
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Total Students", len(st.session_state.students_db))
-        col2.metric("Active Modules", "12")
-        col3.metric("Capacity", "250", "Left: " + str(250 - len(st.session_state.students_db)))
-        col4.metric("JMI Status", "Operational")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Total Scholars", len(st.session_state.students_db))
+        c2.metric("Med-Modules", "12")
+        c3.metric("Portal Capacity", "250")
+        c4.metric("Academic Year", "2026")
         
-        st.markdown("### 📋 Recent Registrations")
-        if not st.session_state.students_db.empty:
-            st.dataframe(st.session_state.students_db, use_container_width=True)
-        else:
-            st.info("No students enrolled yet.")
+        st.markdown("### 📋 Enrollment Overview")
+        st.dataframe(st.session_state.students_db, use_container_width=True)
 
-    # --- ៦. ទំព័រចុះឈ្មោះ (Student Enrollment) ---
-    elif menu == "🎓 Student Enrollment":
-        st.header("Student Registration Portal")
-        with st.form("enroll_form", clear_on_submit=True):
-            col_a, col_b = st.columns(2)
-            with col_a:
-                s_name = st.text_input("Student Full Name", placeholder="Enter Name")
-                s_id = st.text_input("Student ID", placeholder="JMI-2026-XXXX")
-            with col_b:
-                s_grade = st.selectbox("Grade Level", ["Kindergarten", "G1-G3", "G4-G6", "G7-G9", "G10-G12"])
-                s_status = st.selectbox("Enrollment Status", ["Active", "On-Hold"])
+    # --- ៦. ទំព័រចុះឈ្មោះ (Enrollment) ---
+    elif menu == "🎓 Enrollment":
+        st.header("Register New Scholar")
+        with st.form("reg_form", clear_on_submit=True):
+            col_1, col_2 = st.columns(2)
+            with col_1:
+                name = st.text_input("Full Name")
+                sid = st.text_input("Scholar ID (e.g., JMI-2026-002)")
+            with col_2:
+                grade = st.selectbox("Grade Level", ["Kindergarten", "G1-G3", "G4-G6", "G7-G9", "G10-G12"])
+                status = st.selectbox("Enrollment Type", ["Active Scholar", "Probation"])
             
-            submitted = st.form_submit_button("REGISTER TO SYSTEM")
-            
-            if submitted:
-                if s_name and s_id:
-                    new_student = {
-                        'ID': s_id, 'Name': s_name, 'Grade': s_grade, 
-                        'Enroll_Date': datetime.now().strftime("%Y-%m-%d"), 'Status': s_status
-                    }
-                    st.session_state.students_db = pd.concat([st.session_state.students_db, pd.DataFrame([new_student])], ignore_index=True)
-                    st.success(f"Student '{s_name}' has been successfully added to JMI Database!")
+            if st.form_submit_button("CONFIRM ENROLLMENT"):
+                if name and sid:
+                    new_entry = {'ID': sid, 'Name': name, 'Grade': grade, 'Enroll_Date': datetime.now().strftime("%Y-%m-%d"), 'Status': status}
+                    st.session_state.students_db = pd.concat([st.session_state.students_db, pd.DataFrame([new_entry])], ignore_index=True)
+                    st.success(f"Scholar {name} successfully integrated into JMI.")
                 else:
-                    st.error("Please provide both Name and ID.")
+                    st.error("Missing critical information.")
 
     # --- ៧. ផ្នែក Skill Passport ---
     elif menu == "🏅 Skill Passport":
-        st.header("Medical Skill Tracking")
+        st.header("Medical Skill Mastery")
         if not st.session_state.students_db.empty:
-            target = st.selectbox("Select Student to Track:", st.session_state.students_db['Name'])
-            st.info(f"Setting skills for: {target}")
-            
-            cols = st.columns(2)
-            with cols[0]:
-                st.checkbox("Hygiene & Sanitation")
-                st.checkbox("Anatomy Basics")
-            with cols[1]:
-                st.checkbox("Emergency First Aid")
-                st.checkbox("Medical Ethics")
-            st.button("Update Passport")
+            sel_student = st.selectbox("Select Student:", st.session_state.students_db['Name'])
+            st.info(f"Mastery Tracking for: {sel_student}")
+            st.checkbox("Module 1: Clinical Hygiene")
+            st.checkbox("Module 2: Human Anatomy Basics")
+            st.checkbox("Module 3: Medical Ethics & Empathy")
+            st.button("Save Progress")
         else:
-            st.warning("Enroll students first to use this feature.")
+            st.warning("No scholars found.")
 
-    # --- ៨. ផ្នែកវិញ្ញាបនបត្រ (CERTIFICATION - PREMIUM DESIGN) ---
-    elif menu == "📜 Certification":
-        st.header("📜 JMI Executive Certificate Generator")
-        
+    # --- ៨. ផ្នែកវិញ្ញាបនបត្រ (Premium Certification) ---
+    elif menu == "📜 Premium Certification":
+        st.header("📜 Generate Executive Certificate")
         if not st.session_state.students_db.empty:
-            st.write("ជ្រើសរើសសិស្សដើម្បីចេញវិញ្ញាបនបត្រកម្រិត Premium៖")
-            selected_name = st.selectbox("ស្វែងរកឈ្មោះសិស្ស:", st.session_state.students_db['Name'])
-            s_data = st.session_state.students_db[st.session_state.students_db['Name'] == selected_name].iloc[0]
+            target_name = st.selectbox("Search Scholar:", st.session_state.students_db['Name'])
+            student_data = st.session_state.students_db[st.session_state.students_db['Name'] == target_name].iloc[0]
             
-            if st.button("🌟 GENERATE PREMIUM CERTIFICATE"):
+            if st.button("🌟 GENERATE OFFICIAL DOCUMENT"):
                 st.balloons()
                 
-                # រចនាប័ទ្មវិញ្ញាបនបត្រកម្រិតខ្ពស់
-                cert_design = f"""
-                <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&family=DM+Serif+Display&display=swap" rel="stylesheet">
-                
-                <div style="background-color: #e0e0e0; padding: 30px; border-radius: 10px;">
-                    <div style="background-color: white; border: 15px solid #001f3f; padding: 20px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                        
-                        <div style="border: 5px double #D4AF37; padding: 40px; text-align: center; position: relative;">
+                # Premium HTML Certificate Design
+                certificate_html = f"""
+                <div class="cert-outer-wrapper">
+                    <div class="cert-paper">
+                        <div class="cert-gold-border">
+                            <h3 style="font-family: 'Cinzel', serif; color: #001f3f; letter-spacing: 6px; margin: 0;">JUNIOR MEDICAL INSTITUTE</h3>
+                            <div style="width: 60px; height: 2px; background: #D4AF37; margin: 10px auto;"></div>
                             
-                            <h3 style="font-family: 'Cinzel', serif; color: #001f3f; letter-spacing: 8px; margin: 0;">JUNIOR MEDICAL INSTITUTE</h3>
-                            <div style="width: 80px; height: 2px; background: #D4AF37; margin: 15px auto;"></div>
+                            <h1 class="cert-title">CERTIFICATE</h1>
+                            <p class="cert-text" style="letter-spacing: 4px;">OF ACADEMIC EXCELLENCE</p>
                             
-                            <h1 style="font-family: 'Cinzel', serif; color: #001f3f; font-size: 45px; margin: 20px 0;">CERTIFICATE</h1>
-                            <p style="font-family: 'DM Serif Display', serif; font-size: 20px; color: #555; letter-spacing: 3px;">OF COMPLETION AND EXCELLENCE</p>
+                            <p class="cert-text" style="margin-top: 25px; font-style: italic;">This prestigious award is presented to</p>
+                            <h2 class="student-name">{student_data['Name']}</h2>
                             
-                            <p style="font-family: 'DM Serif Display', serif; font-size: 18px; font-style: italic; margin-top: 30px;">This prestigious award is proudly presented to</p>
-                            
-                            <h2 style="font-family: 'Great Vibes', cursive; font-size: 60px; color: #D4AF37; margin: 10px 0; font-weight: normal;">{s_data['Name']}</h2>
-                            
-                            <div style="width: 400px; height: 1px; background: #ccc; margin: 0 auto;"></div>
-                            
-                            <p style="font-family: 'DM Serif Display', serif; font-size: 18px; color: #333; line-height: 1.8; margin-top: 20px;">
-                                for outstanding academic achievement and successful mastery of the<br>
-                                <strong style="color: #001f3f; font-size: 22px;">Medical Foundation Program ({s_data['Grade']})</strong><br>
-                                demonstrating the skills and ethics required for future medical leadership.
+                            <p class="cert-text">
+                                for the successful completion of the <br>
+                                <strong style="color: #001f3f; font-size: 20px;">Medical Foundation Pathway ({student_data['Grade']})</strong><br>
+                                and demonstrating exceptional dedication to medical science.
                             </p>
 
-                            <div style="margin-top: 50px; display: flex; justify-content: space-around; align-items: center;">
+                            <div style="margin-top: 40px; display: flex; justify-content: space-around; align-items: center;">
                                 <div style="text-align: center;">
-                                    <p style="font-family: 'DM Serif Display', serif; border-top: 1px solid #333; padding-top: 5px; width: 180px;">
-                                        {datetime.now().strftime("%B %d, %Y")}<br>
-                                        <span style="font-size: 12px; color: #777;">DATE OF ISSUANCE</span>
+                                    <p class="cert-text" style="border-top: 1px solid #333; width: 160px; padding-top: 5px;">
+                                        {datetime.now().strftime("%B %d, %Y")}<br><span style="font-size: 10px;">DATE</span>
                                     </p>
                                 </div>
                                 
-                                <div style="width: 100px; height: 100px; border: 3px double #D4AF37; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D4AF37; font-family: 'Cinzel', serif; font-weight: bold; font-size: 12px; transform: rotate(-15deg);">
-                                    OFFICIAL<br>SEAL
-                                </div>
+                                <div class="official-seal">JMI<br>OFFICIAL<br>SEAL</div>
 
                                 <div style="text-align: center;">
-                                    <p style="font-family: 'Great Vibes', cursive; font-size: 28px; color: #001f3f; margin-bottom: -10px;">Dr. Chan Sokhoeurn</p>
-                                    <p style="font-family: 'DM Serif Display', serif; border-top: 1px solid #333; padding-top: 5px; width: 180px;">
-                                        Academic Director<br>
-                                        <span style="font-size: 12px; color: #777;">JMI STRATEGIC BOARD</span>
+                                    <p class="signature-font">Dr. Chan Sokhoeurn</p>
+                                    <p class="cert-text" style="border-top: 1px solid #333; width: 160px; padding-top: 5px;">
+                                        Academic Director<br><span style="font-size: 10px;">JMI EXECUTIVE BOARD</span>
                                     </p>
                                 </div>
                             </div>
@@ -167,15 +149,15 @@ if access_code == "JMI2026":
                     </div>
                 </div>
                 """
-                st.markdown(cert_design, unsafe_allow_html=True)
-                st.info("💡 ប្រព័ន្ធបានរៀបចំ Template កម្រិត HD។ លោកបណ្ឌិតអាច Print ជា PDF ដើម្បីទទួលបានគុណភាពច្បាស់បំផុត។")
+                st.markdown(certificate_html, unsafe_allow_html=True)
+                st.write("")
+                st.info("💡 Academic Director's Note: Right-click the certificate and select 'Print' to save as high-quality PDF.")
         else:
-            st.error("មិនទាន់មានទិន្នន័យសិស្ស។ សូមចុះឈ្មោះសិស្សជាមុនសិន។")
-# --- ៩. ទំព័រចាក់សោ (Locked Screen) ---
+            st.error("Please enroll a scholar first.")
+
+# --- ៩. ទំព័រចាក់សោ (Access Restricted) ---
 else:
     st.title("🏥 JMI Strategic Portal")
-    st.subheader("Junior Medical Institute Management System")
-    st.write("---")
-    st.warning("🔒 ផ្នែកនេះត្រូវបានរក្សាសិទ្ធិសម្រាប់តែថ្នាក់ដឹកនាំ JMI ប៉ុណ្ណោះ។")
-    st.info("សូមបញ្ចូលលេខកូដសម្ងាត់នៅរបារខាងឆ្វេង ដើម្បីចូលទៅកាន់ប្រព័ន្ធគ្រប់គ្រង។")
-    st.image("https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1000&q=80")
+    st.markdown("---")
+    st.warning("🔒 This system is restricted to JMI Academic Directors.")
+    st.info("Please enter your access credentials to proceed.")
