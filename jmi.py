@@ -1,198 +1,169 @@
-﻿import streamlit as st
+import streamlit as st
 import pandas as pd
 from datetime import datetime
 import io
 import os
 
-# --- 1. SETTINGS & LUXURY GOLD UI ---
-st.set_page_config(page_title="Banan Loft Management", layout="wide", page_icon="🌿")
+# --- 1. SETTINGS & MEDICAL BRANDING UI ---
+st.set_page_config(page_title="JMI Management System", layout="wide", page_icon="🏥")
 
 st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.05rem; }
-    .main { background-color: #fdfdfd; }
-    [data-testid="stSidebar"] { background-color: #d4af37 !important; }
+    .main { background-color: #f8f9fa; }
+    
+    /* === JMI BRAND COLORS (Medical Blue & Clean White) === */
+    [data-testid="stSidebar"] {
+        background-color: #004a99 !important; 
+    }
+    
     .logo-container {
-        background-color: white; padding: 20px; border-radius: 0 0 20px 20px;
-        margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background-color: white;
+        padding: 15px;
+        border-radius: 0 0 15px 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+
     [data-testid="stSidebar"] * { color: white !important; font-weight: bold; }
-    .logo-container * { color: #1e3932 !important; }
-    .stTextInput input, .stNumberInput input, .stSelectbox [data-baseweb="select"] { 
-        color: #1e3932 !important; background-color: white !important; font-weight: bold; 
-    }
+    
+    /* Buttons - Medical Action Blue */
     .stButton>button { 
-        width: 100%; border-radius: 8px; background-color: #1e3932 !important; 
-        color: white !important; font-weight: bold; height: 45px; border: none;
+        width: 100%; border-radius: 8px; 
+        background-color: #007bff !important; 
+        color: white !important; font-weight: bold; 
+        height: 45px; border: none;
     }
+    
+    /* Dashboard Cards */
     .metric-box { 
         background-color: white; padding: 20px; border-radius: 12px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #d4af37;
-        margin-bottom: 20px; min-height: 120px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+        border-top: 5px solid #004a99;
+        margin-bottom: 20px; 
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- 2. DATA STORAGE ---
-if 'db' not in st.session_state:
-    st.session_state.db = []
+if 'jmi_db' not in st.session_state:
+    st.session_state.jmi_db = []
 
-# --- 3. HELPER FUNCTIONS (ADVANCED EXCEL EXPORT) ---
-def to_excel_with_branding(df, title_text, sheet_name='Report'):
+# --- 3. HELPER FUNCTIONS ---
+def to_excel_jmi(df, title):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name=sheet_name, startrow=5)
-        
-        workbook  = writer.book
-        worksheet = writer.sheets[sheet_name]
-
-        # Formats
-        fmt_title = workbook.add_format({'bold': True, 'font_size': 18, 'font_color': '#1e3932'})
-        fmt_subtitle = workbook.add_format({'bold': True, 'font_size': 14, 'font_color': '#d4af37'})
-        fmt_info = workbook.add_format({'font_size': 10, 'italic': True})
-
-        # Insert Branding Text
-        worksheet.write('A1', 'Banan Loft Strategic Management', fmt_title)
-        worksheet.write('A2', title_text, fmt_subtitle)
-        worksheet.write('A3', f"Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", fmt_info)
-        worksheet.write('A4', f"Authorized by: {st.session_state.get('role', 'System')}", fmt_info)
-
-        # Insert Logo if exists
-        if os.path.exists(LOCAL_LOGO_PATH):
-            worksheet.insert_image('E1', LOCAL_LOGO_PATH, {'x_scale': 0.15, 'y_scale': 0.15})
-
+        df.to_excel(writer, index=False, sheet_name='JMI_Data', startrow=4)
+        workbook, worksheet = writer.book, writer.sheets['JMI_Data']
+        fmt = workbook.add_format({'bold': True, 'font_size': 16, 'font_color': '#004a99'})
+        worksheet.write('A1', 'Junior Medical Institute (JMI)', fmt)
+        worksheet.write('A2', f'Report: {title}')
+        worksheet.write('A3', f'Date: {datetime.now().strftime("%Y-%m-%d")}')
     return output.getvalue()
 
-def add_to_db(cat, desc, amt, type_val, note=""):
-    st.session_state.db.append({
-        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "Category": cat,
-        "Description": desc,
-        "Amount ($)": amt,
-        "Type": type_val,
-        "Note": note,
-        "Authorized By": st.session_state["role"]
+def add_student(name, grade, skill_lv, status):
+    st.session_state.jmi_db.append({
+        "ID": f"JMI-{len(st.session_state.jmi_db)+101}",
+        "Student Name": name,
+        "Grade Level": grade,
+        "Skill Passport Level": skill_lv,
+        "Enrollment Status": status,
+        "Registration Date": datetime.now().strftime("%Y-%m-%d"),
+        "Authorized By": st.session_state.get("role", "Admin")
     })
     st.rerun()
 
-# --- 4. LOGIN & LOGO ---
-LOCAL_LOGO_PATH = "download.png" 
-def check_password():
-    st.sidebar.markdown('<div class="logo-container">', unsafe_allow_html=True)
-    if os.path.exists(LOCAL_LOGO_PATH):
-        st.sidebar.image(LOCAL_LOGO_PATH, use_column_width=True)
-    else:
-        st.sidebar.markdown("<h1 style='margin:0;'>🌿</h1>", unsafe_allow_html=True)
-    st.sidebar.markdown('</div>', unsafe_allow_html=True)
+# --- 4. AUTHENTICATION ---
+def check_auth():
+    st.sidebar.markdown('<div class="logo-container"><h2 style="color:#004a99;margin:0;">JMI Portal</h2></div>', unsafe_allow_html=True)
+    if "jmi_auth" not in st.session_state: st.session_state.jmi_auth = False
     
-    if "auth_status" not in st.session_state:
-        st.session_state["auth_status"] = False
-    if not st.session_state["auth_status"]:
-        st.sidebar.markdown("<h3 style='text-align: center; color: white;'>PORTAL ACCESS</h3>", unsafe_allow_html=True)
-        with st.sidebar.form("login"):
-            pwd = st.text_input("Access Code", type="password")
-            if st.form_submit_button("AUTHORIZE"):
-                roles = {"GM2026": "General Manager", "INV2026": "Inventory Officer", "FIN2026": "Finance Manager", "CRM2026": "CRM Executive"}
-                if pwd in roles:
-                    st.session_state.update({"auth_status": True, "role": roles[pwd]})
+    if not st.session_state.jmi_auth:
+        with st.sidebar.form("Login"):
+            code = st.text_input("JMI Access Code", type="password")
+            if st.form_submit_button("LOGIN"):
+                if code == "JMI2026": # លេខកូដសម្ងាត់សម្រាប់ JMI
+                    st.session_state.jmi_auth = True
+                    st.session_state.role = "Academic Director"
                     st.rerun()
+                else: st.sidebar.error("Invalid Code")
         return False
     return True
 
-if not check_password(): st.stop()
+if not check_auth(): st.stop()
 
-# --- 5. DATA PREPARATION ---
-df_master = pd.DataFrame(st.session_state.db) if st.session_state.db else pd.DataFrame(columns=["Timestamp", "Category", "Description", "Amount ($)", "Type", "Note", "Authorized By"])
+# --- 5. NAVIGATION ---
+st.sidebar.markdown("### 📋 MANAGEMENT")
+menu = st.sidebar.radio("", ["📊 Dashboard", "🎓 Student Enrollment", "🧬 Skill Passport", "📜 Certification"])
 
-# --- 6. NAVIGATION ---
-st.sidebar.markdown("### MAIN MENU")
-menu = st.sidebar.radio("", ["📊 Dashboard", "💰 Finance", "📦 Inventory", "👥 Staff", "🤝 CRM"])
 if st.sidebar.button("🚪 LOGOUT"):
-    st.session_state["auth_status"] = False
+    st.session_state.jmi_auth = False
     st.rerun()
 
-# --- 7. MAIN HEADER ---
-head_col1, head_col2 = st.columns([1, 5])
-with head_col1:
-    if os.path.exists(LOCAL_LOGO_PATH): st.image(LOCAL_LOGO_PATH, width=130)
-    else: st.markdown("<h1 style='text-align:right;'>🌿</h1>", unsafe_allow_html=True)
-with head_col2:
-    st.markdown(f'<div style="padding-top: 15px;"><h1 style="margin-bottom: 0px; color: #1e3932;">Banan Loft Strategic Management</h1><p><b>Operator:</b> {st.session_state["role"]} | 🟢 Online</p></div>', unsafe_allow_html=True)
+# --- 6. HEADER ---
+st.markdown(f"""
+    <div style="display: flex; align-items: center;">
+        <h1 style="color: #004a99;">Junior Medical Institute</h1>
+        <span style="margin-left: 20px; padding: 5px 15px; background: #e3f2fd; border-radius: 20px; color: #004a99; font-weight: bold;">
+            {st.session_state.role} Mode
+        </span>
+    </div>
+    <p style="color: #666;">Pre-Med from Kindergarten to Grade 12 Excellence</p>
+""", unsafe_allow_html=True)
 st.divider()
+
+# --- 7. DATABASE PREP ---
+df = pd.DataFrame(st.session_state.jmi_db) if st.session_state.jmi_db else pd.DataFrame(columns=["ID", "Student Name", "Grade Level", "Skill Passport Level", "Enrollment Status", "Registration Date"])
 
 # --- 8. MODULES ---
 
-# 📊 DASHBOARD
 if menu == "📊 Dashboard":
-    st.subheader("🚀 Strategic Overview")
-    inc = df_master[df_master['Type'] == 'Income']['Amount ($)'].sum()
-    exp = df_master[df_master['Type'] == 'Expense']['Amount ($)'].abs().sum()
     m1, m2, m3, m4 = st.columns(4)
-    with m1: st.markdown(f"<div class='metric-box'>💰 Net Balance<br><h2>$ {inc-exp:,.2f}</h2></div>", unsafe_allow_html=True)
-    with m2: st.markdown(f"<div class='metric-box'>🤝 Members<br><h2>{len(df_master[df_master['Category']=='CRM'])}</h2></div>", unsafe_allow_html=True)
-    with m3: st.markdown(f"<div class='metric-box'>👥 Staff<br><h2>{len(df_master[df_master['Category']=='Staff'])}</h2></div>", unsafe_allow_html=True)
-    with m4: st.markdown(f"<div class='metric-box'>📅 Today<br><h2>{datetime.now().strftime('%d %b')}</h2></div>", unsafe_allow_html=True)
+    with m1: st.markdown(f"<div class='metric-box'>👨‍⚕️ Total Students<br><h2>{len(df)}</h2></div>", unsafe_allow_html=True)
+    with m2: st.markdown(f"<div class='metric-box'>🧬 Active Skills<br><h2>{len(df[df['Skill Passport Level'] != 'None'])}</h2></div>", unsafe_allow_html=True)
+    with m3: st.markdown(f"<div class='metric-box'>🏫 K-Grade 6<br><h2>{len(df[df['Grade Level'].isin(['Kindergarten', 'Primary'])])}</h2></div>", unsafe_allow_html=True)
+    with m4: st.markdown(f"<div class='metric-box'>🏥 Capacity<br><h2>250</h2></div>", unsafe_allow_html=True)
     
-    st.write("### 📜 Master Activity Log")
-    st.dataframe(df_master, use_container_width=True)
-    if not df_master.empty:
-        st.download_button("📥 Export Master Report", data=to_excel_with_branding(df_master, "Master Strategic Log"), file_name='Banan_Master_Report.xlsx')
+    st.write("### 📂 Recent Registrations")
+    st.dataframe(df, use_container_width=True)
+    if not df.empty:
+        st.download_button("📥 Download Master Student List", data=to_excel_jmi(df, "Master List"), file_name="JMI_Students.xlsx")
 
-# 💰 FINANCE
-elif menu == "💰 Finance":
-    st.subheader("Financial Ledger")
-    c1, c2 = st.columns(2)
-    with c1:
-        with st.form("f_in", clear_on_submit=True):
-            st.write("📥 Record Income")
-            desc, amt = st.text_input("Source"), st.number_input("Amount ($)", min_value=0.0)
-            if st.form_submit_button("Save Income") and desc: add_to_db("Finance", desc, amt, "Income")
-    with c2:
-        with st.form("f_out", clear_on_submit=True):
-            st.write("📤 Record Expense")
-            desc, amt = st.text_input("Detail"), st.number_input("Amount ($)", min_value=0.0)
-            if st.form_submit_button("Save Expense") and desc: add_to_db("Finance", desc, -amt, "Expense")
-    df_fin = df_master[df_master['Category'] == 'Finance']
-    st.dataframe(df_fin, use_container_width=True)
-    if not df_fin.empty:
-        st.download_button("📥 Export Financial Ledger", data=to_excel_with_branding(df_fin, "Financial Ledger Report"), file_name='Banan_Finance.xlsx')
+elif menu == "🎓 Student Enrollment":
+    st.subheader("New Student Registration")
+    with st.form("enroll"):
+        c1, c2 = st.columns(2)
+        name = c1.text_input("Full Name")
+        grade = c2.selectbox("Grade Category", ["Kindergarten", "Primary (G1-G6)", "Secondary (G7-G12)"])
+        status = c1.selectbox("Status", ["Enrolled", "Waiting List"])
+        skill = c2.selectbox("Initial Skill Level", ["Beginner", "Intermediate", "Advanced"])
+        if st.form_submit_button("Register Student"):
+            if name: add_student(name, grade, skill, status)
 
-# 📦 INVENTORY
-elif menu == "📦 Inventory":
-    st.subheader("Inventory Control")
-    with st.form("inv", clear_on_submit=True):
-        item, qty = st.text_input("Item Name"), st.number_input("Quantity", min_value=0)
-        unit = st.selectbox("Unit", ["KG", "Pack", "Bottle", "Box", "Sack"])
-        if st.form_submit_button("Update Stock") and item: add_to_db("Inventory", item, 0, f"Qty: {qty} {unit}")
-    df_inv = df_master[df_master['Category'] == 'Inventory']
-    st.dataframe(df_inv, use_container_width=True)
-    if not df_inv.empty:
-        st.download_button("📥 Export Inventory Control", data=to_excel_with_branding(df_inv, "Inventory Control List"), file_name='Banan_Inventory.xlsx')
+elif menu == "🧬 Skill Passport":
+    st.subheader("Medical Skill Tracking")
+    if df.empty: st.info("No students registered yet.")
+    else:
+        target_student = st.selectbox("Select Student", df["Student Name"].tolist())
+        st.info(f"Updating Skill Passport for: **{target_student}**")
+        col1, col2, col3 = st.columns(3)
+        col1.checkbox("Anatomy Basics")
+        col1.checkbox("First Aid Level 1")
+        col2.checkbox("Nutrition Science")
+        col2.checkbox("Microbiology Intro")
+        col3.checkbox("Medical Ethics")
+        col3.checkbox("Lab Safety")
+        st.button("Update Passport")
 
-# 👥 STAFF
-elif menu == "👥 Staff":
-    st.subheader("Human Resources")
-    with st.form("stf", clear_on_submit=True):
-        name, pos = st.text_input("Name"), st.selectbox("Position", ["Barista", "Server", "Manager", "Chef", "Cleaner"])
-        salary = st.number_input("Salary ($)", min_value=0.0)
-        if st.form_submit_button("Add Staff") and name: add_to_db("Staff", name, salary, pos)
-    df_stf = df_master[df_master['Category'] == 'Staff']
-    st.dataframe(df_stf, use_container_width=True)
-    if not df_stf.empty:
-        st.download_button("📥 Export Human Resources", data=to_excel_with_branding(df_stf, "Human Resources Directory"), file_name='Banan_Staff.xlsx')
-
-# 🤝 CRM
-elif menu == "🤝 CRM":
-    st.subheader("Membership Management")
-    with st.form("crm", clear_on_submit=True):
-        cust, tier = st.text_input("Customer Name"), st.selectbox("Tier", ["Silver", "Gold", "VIP"])
-        phone = st.text_input("Phone")
-        if st.form_submit_button("Register Member") and cust: add_to_db("CRM", cust, 0, tier, f"Tel: {phone}")
-    df_crm = df_master[df_master['Category'] == 'CRM']
-    st.dataframe(df_crm, use_container_width=True)
-    if not df_crm.empty:
-        st.download_button("📥 Export Membership Management", data=to_excel_with_branding(df_crm, "Membership Management Database"), file_name='Banan_Members.xlsx')
+elif menu == "📜 Certification":
+    st.subheader("Certificate Issuance")
+    if df.empty: st.info("No data available for certification.")
+    else:
+        st.write("Select students to issue digital certificates:")
+        st.dataframe(df[["ID", "Student Name", "Grade Level"]])
+        st.button("Generate Digital Certificates (Bulk)")
 
 # --- FOOTER ---
 st.sidebar.markdown("---")
-st.sidebar.info(f"v15.6 | Branded Export Edition\nDr. CHAN Sokhoeurn, DBA")
+st.sidebar.info("v1.0 | JMI Strategic Portal\nDr. CHAN Sokhoeurn, DBA")
