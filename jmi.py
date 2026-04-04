@@ -104,53 +104,73 @@ if access_code == "JMI2026":
         else:
             st.warning("Enroll students first to use this feature.")
 
-    # --- ៨. ផ្នែកវិញ្ញាបនបត្រ (CERTIFICATION - FIXED) ---
+    # --- ៨. ផ្នែកវិញ្ញាបនបត្រ (CERTIFICATION - PREMIUM DESIGN) ---
     elif menu == "📜 Certification":
-        st.header("📜 JMI Digital Certificate Generator")
+        st.header("📜 JMI Executive Certificate Generator")
         
         if not st.session_state.students_db.empty:
-            st.write("ជ្រើសរើសសិស្សដើម្បី Preview និងបោះពុម្ពវិញ្ញាបនបត្រ៖")
+            st.write("ជ្រើសរើសសិស្សដើម្បីចេញវិញ្ញាបនបត្រកម្រិត Premium៖")
             selected_name = st.selectbox("ស្វែងរកឈ្មោះសិស្ស:", st.session_state.students_db['Name'])
-            
-            # ទាញយកទិន្នន័យសិស្ស
             s_data = st.session_state.students_db[st.session_state.students_db['Name'] == selected_name].iloc[0]
             
-            if st.button("GENERATE OFFICIAL CERTIFICATE"):
+            if st.button("🌟 GENERATE PREMIUM CERTIFICATE"):
                 st.balloons()
-                # ការរចនាវិញ្ញាបនបត្រជា HTML
+                
+                # រចនាប័ទ្មវិញ្ញាបនបត្រកម្រិតខ្ពស់
                 cert_design = f"""
-                <div class="cert-container">
-                    <div class="cert-inner">
-                        <h1 style="font-family:serif; font-size:45px; margin-bottom:10px;">CERTIFICATE</h1>
-                        <h3 style="letter-spacing: 5px; margin-bottom:30px;">OF ACHIEVEMENT</h3>
-                        <p style="font-size:20px; font-style:italic;">This is to officially certify that</p>
-                        <h2 style="color:#D4AF37; font-size:40px; font-family: 'DM Sans'; margin:20px 0;">{s_data['Name']}</h2>
-                        <p style="font-size:18px; line-height:1.6;">
-                            has successfully demonstrated excellence and completed the <br>
-                            <b>Medical Foundation Program ({s_data['Grade']})</b><br>
-                            at the Junior Medical Institute.
-                        </p>
-                        <div style="margin-top:60px; display:flex; justify-content:space-around;">
-                            <div style="text-align:center;">
-                                <p style="border-top:2px solid #001f3f; padding-top:10px; width:200px;">
-                                    {datetime.now().strftime("%B %d, %Y")}<br><b>Date of Issue</b>
-                                </p>
-                            </div>
-                            <div style="text-align:center;">
-                                <p style="border-top:2px solid #001f3f; padding-top:10px; width:200px;">
-                                    Dr. CHAN Sokhoeurn, DBA<br><b>Academic Director</b>
-                                </p>
+                <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+                
+                <div style="background-color: #e0e0e0; padding: 30px; border-radius: 10px;">
+                    <div style="background-color: white; border: 15px solid #001f3f; padding: 20px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                        
+                        <div style="border: 5px double #D4AF37; padding: 40px; text-align: center; position: relative;">
+                            
+                            <h3 style="font-family: 'Cinzel', serif; color: #001f3f; letter-spacing: 8px; margin: 0;">JUNIOR MEDICAL INSTITUTE</h3>
+                            <div style="width: 80px; height: 2px; background: #D4AF37; margin: 15px auto;"></div>
+                            
+                            <h1 style="font-family: 'Cinzel', serif; color: #001f3f; font-size: 45px; margin: 20px 0;">CERTIFICATE</h1>
+                            <p style="font-family: 'DM Serif Display', serif; font-size: 20px; color: #555; letter-spacing: 3px;">OF COMPLETION AND EXCELLENCE</p>
+                            
+                            <p style="font-family: 'DM Serif Display', serif; font-size: 18px; font-style: italic; margin-top: 30px;">This prestigious award is proudly presented to</p>
+                            
+                            <h2 style="font-family: 'Great Vibes', cursive; font-size: 60px; color: #D4AF37; margin: 10px 0; font-weight: normal;">{s_data['Name']}</h2>
+                            
+                            <div style="width: 400px; height: 1px; background: #ccc; margin: 0 auto;"></div>
+                            
+                            <p style="font-family: 'DM Serif Display', serif; font-size: 18px; color: #333; line-height: 1.8; margin-top: 20px;">
+                                for outstanding academic achievement and successful mastery of the<br>
+                                <strong style="color: #001f3f; font-size: 22px;">Medical Foundation Program ({s_data['Grade']})</strong><br>
+                                demonstrating the skills and ethics required for future medical leadership.
+                            </p>
+
+                            <div style="margin-top: 50px; display: flex; justify-content: space-around; align-items: center;">
+                                <div style="text-align: center;">
+                                    <p style="font-family: 'DM Serif Display', serif; border-top: 1px solid #333; padding-top: 5px; width: 180px;">
+                                        {datetime.now().strftime("%B %d, %Y")}<br>
+                                        <span style="font-size: 12px; color: #777;">DATE OF ISSUANCE</span>
+                                    </p>
+                                </div>
+                                
+                                <div style="width: 100px; height: 100px; border: 3px double #D4AF37; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D4AF37; font-family: 'Cinzel', serif; font-weight: bold; font-size: 12px; transform: rotate(-15deg);">
+                                    OFFICIAL<br>SEAL
+                                </div>
+
+                                <div style="text-align: center;">
+                                    <p style="font-family: 'Great Vibes', cursive; font-size: 28px; color: #001f3f; margin-bottom: -10px;">Dr. Chan Sokhoeurn</p>
+                                    <p style="font-family: 'DM Serif Display', serif; border-top: 1px solid #333; padding-top: 5px; width: 180px;">
+                                        Academic Director<br>
+                                        <span style="font-size: 12px; color: #777;">JMI STRATEGIC BOARD</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 """
                 st.markdown(cert_design, unsafe_allow_html=True)
-                st.write("")
-                st.info("💡 គន្លឹះ៖ លោកបណ្ឌិតអាចចុច Mouse ស្ដាំលើរូបវិញ្ញាបនបត្រ រួចយក 'Print' ដើម្បី Save ជា PDF ទុកជូនសិស្ស។")
+                st.info("💡 ប្រព័ន្ធបានរៀបចំ Template កម្រិត HD។ លោកបណ្ឌិតអាច Print ជា PDF ដើម្បីទទួលបានគុណភាពច្បាស់បំផុត។")
         else:
-            st.error("System Error: No student data found. Please enroll a student first.")
-
+            st.error("មិនទាន់មានទិន្នន័យសិស្ស។ សូមចុះឈ្មោះសិស្សជាមុនសិន។")
 # --- ៩. ទំព័រចាក់សោ (Locked Screen) ---
 else:
     st.title("🏥 JMI Strategic Portal")
