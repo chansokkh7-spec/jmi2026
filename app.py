@@ -4,18 +4,18 @@ import base64
 import os
 from datetime import datetime
 
-# --- ១. ការកំណត់ទម្រង់កម្មវិធី (Executive Configuration) ---
+# --- ១. ការកំណត់ទម្រង់កម្មវិធី ---
 st.set_page_config(
     page_title="JMI | Strategic Management Portal",
     page_icon="🏥",
     layout="wide"
 )
 
-# --- ២. ការរចនា Style (Premium CSS - ការពារកំហុស Syntax) ---
-# ការប្រើ f-string ជាមួយ CSS ត្រូវតែប្រើ {{ }} ដើម្បីកុំឱ្យ Streamlit ច្រឡំ
-style_code = """
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&family=DM+Serif+Display&family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+# --- ២. ការរចនា Style (ដំណោះស្រាយសម្រាប់អក្សររាយប៉ាយ) ---
+# ប្រើ triple quotes បែបនេះ ហើយមិនត្រូវប្រើអក្សរ f នៅខាងមុខទេ
+style_block = """
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&family=DM+Serif+Display&family=Kantumruy+Pro:wght@400;700&display=swap" rel="stylesheet">
+<style>
     html, body, [class*="css"], .stMarkdown {
         font-family: 'Kantumruy Pro', sans-serif;
     }
@@ -32,46 +32,37 @@ style_code = """
     .cert-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: #333; line-height: 1.6; }
     .signature { font-family: 'Great Vibes', cursive; font-size: 30px; color: #001f3f; margin-bottom: -10px; }
     .sig-box { border-top: 1px solid #333; width: 180px; margin: auto; padding-top: 5px; font-family: serif; font-size: 13px; color: #333; }
-    </style>
+</style>
 """
-st.markdown(style_code, unsafe_allow_html=True)
+st.markdown(style_block, unsafe_allow_html=True)
 
-# --- ៣. ការគ្រប់គ្រងទិន្នន័យ (Session State) ---
+# --- ៣. ការគ្រប់គ្រងទិន្នន័យ ---
 if 'db' not in st.session_state:
     st.session_state.db = pd.DataFrame([
         {
             "ID": "JMI-2026-001", "Name": "Sokhoeurn Sovannachak", 
             "Level": "K-G3", "Enroll_Date": "2026-03-25", 
-            "Status": "Active", "Skills": ["Human Anatomy Basics"]
+            "Status": "Active", "Skills": []
         }
     ])
 
-# --- ៤. របារចំហៀង (Sidebar Security) ---
-st.sidebar.markdown("<h2 style='text-align: center; color: #001f3f;'>JMI EXECUTIVE</h2>", unsafe_allow_html=True)
-st.sidebar.markdown("<center><h1 style='font-size:60px;'>🏥</h1></center>", unsafe_allow_html=True)
-st.sidebar.markdown("---")
+# --- ៤. របារចំហៀង (Sidebar) ---
+st.sidebar.markdown("<h2 style='text-align: center;'>JMI EXECUTIVE</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("<center><h1 style='font-size:70px;'>🏥</h1></center>", unsafe_allow_html=True)
+password = st.sidebar.text_input("Director's Key", type="password")
 
-key = st.sidebar.text_input("Director's Key", type="password", placeholder="Enter Password")
-
-# --- ៥. កម្មវិធីចម្បង (Main Logic) ---
-if key == "JMI2026":
+# --- ៥. កម្មវិធីចម្បង ---
+if password == "JMI2026":
     st.sidebar.success("Welcome, Dr. CHAN Sokhoeurn")
     menu = st.sidebar.radio("MENU", ["📊 Dashboard", "🎓 Enrollment", "🏅 Skill Passport", "📜 Certification"])
 
-    # ៥.១ Dashboard
     if menu == "📊 Dashboard":
-        st.title("🏥 JMI Command Center")
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Scholars", len(st.session_state.db))
-        col2.metric("Status", "Operational")
-        col3.metric("Year", "2026")
-        st.markdown("### 📋 Student Roster")
+        st.title("🏥 JMI Strategic Command Center")
         st.dataframe(st.session_state.db.drop(columns=['Skills']), use_container_width=True)
 
-    # ៥.២ Enrollment
     elif menu == "🎓 Enrollment":
         st.header("Register New Scholar")
-        with st.form("enroll_form"):
+        with st.form("reg_form"):
             name = st.text_input("Full Name")
             sid = st.text_input("Scholar ID")
             level = st.selectbox("Level", ["K-G3", "G4-G6", "G7-G9", "G10-G12"])
@@ -79,55 +70,40 @@ if key == "JMI2026":
                 if name and sid:
                     new_st = pd.DataFrame([{"ID": sid, "Name": name, "Level": level, "Enroll_Date": datetime.now().strftime("%Y-%m-%d"), "Status": "Active", "Skills": []}])
                     st.session_state.db = pd.concat([st.session_state.db, new_st], ignore_index=True)
-                    st.success("Registration Success!")
-                else:
-                    st.warning("Please fill all fields.")
+                    st.success("Success!")
 
-    # ៥.៣ Skill Passport
     elif menu == "🏅 Skill Passport":
         st.header("🏅 Skill Mastery")
         sel_name = st.selectbox("Select Student:", st.session_state.db['Name'].tolist())
         idx = st.session_state.db.index[st.session_state.db['Name'] == sel_name][0]
-        
         skills_list = ["Clinical Hygiene", "Human Anatomy", "Vital Signs", "First Aid", "Ethics"]
-        current_skills = st.session_state.db.at[idx, 'Skills']
-        
-        new_skills = []
+        current = st.session_state.db.at[idx, 'Skills']
+        new_selection = []
         for s in skills_list:
-            if st.checkbox(s, value=(s in current_skills)):
-                new_skills.append(s)
-        
+            if st.checkbox(s, value=(s in current)):
+                new_selection.append(s)
         if st.button("💾 Save Progress"):
-            st.session_state.db.at[idx, 'Skills'] = new_skills
-            st.success("Progress Saved!")
+            st.session_state.db.at[idx, 'Skills'] = new_selection
             st.rerun()
 
-    # ៥.៤ Certification
     elif menu == "📜 Certification":
-        st.header("Generate Certificate")
-        target = st.selectbox("Choose Recipient:", st.session_state.db['Name'])
+        st.header("Certification")
+        target = st.selectbox("Recipient:", st.session_state.db['Name'])
         s_info = st.session_state.db[st.session_state.db['Name'] == target].iloc[0]
-        
-        if st.button("🌟 PREVIEW CERTIFICATE"):
-            st.balloons()
-            # បង្កើតផ្កាយមាស
+        if st.button("🌟 GENERATE"):
             stars = "".join(['<span class="star-gold">★</span>' for _ in range(len(s_info['Skills']))])
             st.markdown(f"""
             <div class="cert-paper"><div class="cert-border">
-                <p style="letter-spacing: 5px; color: #555; font-size: 12px;">JUNIOR MEDICAL INSTITUTE</p>
                 <h1 class="cert-header">CERTIFICATE</h1>
                 <div style="margin: 10px 0;">{stars}</div>
-                <p class="cert-text">This is proudly presented to</p>
                 <h2 class="student-name">{s_info['Name']}</h2>
-                <p class="cert-text">For mastering the <b>Medical Foundation Pathway</b><br>Level: {s_info['Level']}</p>
+                <p class="cert-text">For mastering Medical Foundation ({s_info['Level']})</p>
                 <div style="margin-top: 40px; display: flex; justify-content: space-around;">
-                    <div style="text-align:center;"><p style="font-size:14px;">{datetime.now().strftime("%d %B %Y")}</p><div class="sig-box">DATE</div></div>
+                    <div style="text-align:center;"><p>{datetime.now().strftime("%d %b %Y")}</p><div class="sig-box">DATE</div></div>
                     <div style="text-align:center;"><p class="signature">Dr. Chan Sokhoeurn</p><div class="sig-box">ACADEMIC DIRECTOR</div></div>
                 </div>
             </div></div>
             """, unsafe_allow_html=True)
-
-# --- ៦. ផ្ទាំង Lock ---
 else:
     st.title("🏥 JMI Strategic Command Portal")
-    st.info("🔒 សូមបញ្ចូល Password 'JMI2026' នៅខាងឆ្វេងដើម្បីបើកប្រព័ន្ធ។")
+    st.info("🔒 សូមបញ្ចូល Password 'JMI2026' នៅខាងឆ្វេង។")
